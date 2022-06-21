@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue2</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+    <div>
+        <p>el与$mount作用一致,将实例化后的vue挂载到指定dom上</p>
+        <p>el与$mount同时存在时，el优先级大于$mount</p>
+        <div id="app">
+            {{message}}
+        </div>
+        <div id="app2">
+            {{message}}
+        </div>
+    </div>
+    <hr>
+    <div id="app3">
+        <p>v-bind:</p>
+        <span v-bind:title="message">鼠标悬停几秒钟查看此处动态绑定的提示信息！</span>
+    </div>
+    <hr>
+    <div id="app4">
+        <p>v-if/v-else/v-else-if和v-show</p>
+        <p v-if="state1">v-if为真状态下可见,为假时从dom上删除</p>
+        <p v-show="state2">v-show为真状态下可见，为假时添加style{display: none}</p>
+        <button v-on:click="state1 = !state1">v-if switch</button>
+        <button v-on:click="state2 = !state2">v-show switch</button>
+    </div>
+    <hr>
+    <div id="app5">
+        <p>v-for</p>
+        <ul v-for="item in todo" :key="item.id">
+            <li>{{item.name}}</li>
+        </ul>
+    </div>
+    <hr>
+    <div id="app6">
+        <p>v-model</p>
+        <input type="text" v-model="value">
+        {{value}}
+    </div>
+    <hr>
+    <div id="app7">
+        <p>vue component</p>
+        <item :value="value"></item>
+    </div>
+    <hr>
+    <div id="app8">
+        <p>生命周期与watch/computed</p>
+        <p>值：{{value}}</p>
+        <button v-on:click="value = 'typescript'">update</button>
+        <p>computed计算属性的值：{{reverseValue}}</p>
+        <p>watch监听属性的值：旧值{{oldVal ? oldVal : '还没有变化'}},新值{{newVal ? newVal : '还没有变化'}}</p>
+    </div>
+    <hr>
+    <div id="app9">
+        <p>v-slot</p>
+        <parent>
+            <template v-slot:default>
+                <p>hello,parent</p>
+            </template>
+        </parent>
+    </div>
+    <hr>
+    <div id="app10">
+        <p>自定义指令: v-focus</p>
+        <input v-focus/>
+        <input v-focus2/>
+    </div>
+    <hr>
+    <div id="app11">
+    </div>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                message: 'hello vue.js，通过el自动挂载到dom'
+            }
+        })
+        const app2 = new Vue({
+            data: {
+                message: 'hello vue2，通过$mount手动挂载到dom'
+            }
+        }).$mount('#app2')
+        const app3 = new Vue({
+            el: '#app3',
+            data: {
+                message: '页面加载于' + new Date().toLocaleDateString()
+            }
+        })
+        const app4 = new Vue({
+            el: '#app4',
+            data: {
+                state1: true,
+                state2: true,
+            }
+        })
+        const app5 = new Vue({
+            el: '#app5',
+            data: {
+                todo: [
+                    {id: 1, name: 'vue'},
+                    {id: 2, name: 'react'},
+                    {id: 3, name: 'angular'}
+                ]
+            }
+        })
+        const app6 = new Vue({
+            el: '#app6',
+            data: {
+                value: ''
+            }
+        })
+        Vue.component('item', {
+            props: ['value'],
+            template: `<div>item组件参上,接收{{value}}</div>`
+        })
+        const app7 = new Vue({
+            el: '#app7',
+            data: {
+                value: '来自parent的问候'
+            }
+        })
+        const app8 = new Vue({
+            el: '#app8',
+            data: {
+                value: 'javascript',
+                newVal: '',
+                oldVal: ''
+            },
+            beforeCreate: function () {
+                console.log('beforeCreate')
+            },
+            created: function () {
+                console.log('created')
+            },
+            beforeMount: function () {
+                console.log('beforeMount')
+            },
+            mounted: function () {
+                console.log('mounted')
+            },
+            beforeUpdate: function () {
+                console.log('beforeUpdate')
+            },
+            updated: function () {
+                console.log('updated')
+            },
+            beforeDestroy: function () {
+                console.log('beforeDestroy')
+            },
+            destroyed: function () {
+                console.log('destroyed')
+            },
+            computed: {
+                reverseValue: function () {
+                    return this.value.split('').reverse().join('')
+                }
+            },
+            watch: {
+                value: function (newVal, oldVal) {
+                    this.newVal = newVal
+                    this.oldVal = oldVal
+                    return
+                }
+            }
+        })
+        app8.$watch('value', function (newVal, oldVal) {
+            console.log('newVal:',newVal,'oldVal',oldVal)
+        })
+        const child = {
+            props: ['value'],
+            template: `<div>child组件参上,接收{{value}}</div>`
+        }
+        Vue.component('parent', {
+            template: `
+                <div>
+                    <child :value="msg"></child>
+                    <slot></slot>
+                </div>
+            `,
+            data: function () {
+                return {
+                    msg: '来自parent组件'
+                }
+            },
+            components: {child: child}
+        })
+        const app9 = new Vue({
+            el: '#app9',
+            data: {
+                value: '来自parent的问候'
+            }
+        })
+        Vue.directive('focus', {
+            inserted: function (el) {
+                el.focus()
+            }
+        })
+        const app10 = new Vue({
+            el: '#app10',
+            directives: {
+                focus2: {
+                    inserted: function(el) {
+                        el.focus()
+                    }
+                }
+            }
+        })
+        const app11 = new Vue({
+            el: '#app11',
+            render: function (h, context) {
+                return (
+                    h('div', 'jsx 构建的组件')
+                )
+            }
+        })
+    </script>
+</body>
+</html>
